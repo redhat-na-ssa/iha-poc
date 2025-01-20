@@ -1,5 +1,5 @@
 # python-rest-api
-test for webhook
+
 See `README.INSTRUCTIONS.md` for Canary roll out from VM to pod in OpenShift with Service Mesh.   
 [link](./README.INSTRUCTIONS.md)
 
