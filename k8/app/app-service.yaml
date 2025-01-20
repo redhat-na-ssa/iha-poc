@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sample-rest-api
+    app.kubernetes.io/component: sample-rest-api
+    app.kubernetes.io/instance: sample-rest-api
+    app.kubernetes.io/name: sample-rest-api
+    app.kubernetes.io/part-of: sample-rest-api
+  name: sample-rest-api
+  namespace: island-ci-cd-poc
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: 8080-tcp
+    port: 8080
+  selector:
+    app: sample-rest-api
+    deployment: sample-rest-api
