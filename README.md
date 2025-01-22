@@ -3,7 +3,7 @@
 uses environment variable to set the name of the service
 `SERVICE_LOCAL` (default value is `"python-rest-api"`)   
 
-exampple:   
+example:   
 `export SERVICE_LOCAL="my-api"`   
 
 To build and run a container:  
