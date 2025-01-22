@@ -1,9 +1,0 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: argocd-tekton-role
-  namespace: island-ci-cd-poc
-rules:
-  - apiGroups: ["tekton.dev"]
-    resources: ["pipelines"]
-    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
