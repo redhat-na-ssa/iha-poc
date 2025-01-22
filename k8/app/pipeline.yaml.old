@@ -86,20 +86,5 @@ spec:
       - name: namespace
         value: openshift-pipelines
       resolver: cluster
-  - name: cleanup
-    params:
-    - name: SCRIPT
-      value: oc delete pod -l deployment=$(params.APP_NAME)
-    runAfter:
-    - deploy
-    taskRef:
-      params:
-      - name: kind
-        value: task
-      - name: name
-        value: openshift-client
-      - name: namespace
-        value: openshift-pipelines
-      resolver: cluster
   workspaces:
   - name: workspace
