@@ -20,7 +20,7 @@ service_remote = os.getenv('SERVICE_REMOTE', 'python-rest-api-b')
 
 @app.get("/")
 async def usage():
-    return {"message": "See /docs for API usage - test"}
+    return {"message": "See /docs for API usage"}
 
 @app.get("/hello")
 async def read_hello():
