@@ -10,7 +10,7 @@ metadata:
     pipeline.openshift.io/strategy: docker
     pipeline.openshift.io/type: kubernetes
     tekton.dev/pipeline: sample-rest-api
-  name: sample-rest-api-td5gib
+  name: sample-rest-api-run
   namespace: island-ci-cd-poc
 spec:
   params:
