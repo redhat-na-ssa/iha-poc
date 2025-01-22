@@ -16,7 +16,7 @@ app.add_middleware(
 
 # Get the environment variable 'SERVICE_LOCAL', set to 'python-rest-api' if it doesn't exist
 service_local = os.getenv('SERVICE_LOCAL', 'python-rest-api-a')
-service_remote = os.getenv('SERVICE_REMOTE', 'python-rest-api-b')
+service_remote = os.getenv('SERVICE_REMOTE', 'python-rest-api-a')
 
 @app.get("/")
 async def usage():
