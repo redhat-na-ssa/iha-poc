@@ -86,7 +86,7 @@ spec:
       - name: namespace
         value: openshift-pipelines
       resolver: cluster
-  - name: cleanup
+  - name: update
     params:
     - name: SCRIPT
       value: oc delete pod -l deployment=$(params.APP_NAME)
