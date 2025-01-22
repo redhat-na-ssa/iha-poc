@@ -1,0 +1,1 @@
+oc delete pods -l app.kubernetes.io/managed-by=tekton-pipelines
