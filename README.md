@@ -1,5 +1,5 @@
 # python-rest-api
-
+TEST
 uses environment variable to set the name of the service
 `SERVICE_LOCAL` (default value is `"python-rest-api"`)   
 
