@@ -4,6 +4,7 @@ metadata:
   name: argocd-app-controller-role
   namespace: island-ci-cd-poc
 rules:
+  # Core Kubernetes Resources
   - apiGroups: [""]
     resources: ["services"]
     verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
@@ -13,7 +14,15 @@ rules:
   - apiGroups: ["route.openshift.io"]
     resources: ["routes"]
     verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
---- 
+
+  # Tekton Pipeline and Trigger Resources
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelines", "pipelineruns", "taskruns"]
+    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggertemplates", "triggerbindings"]
+    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -26,28 +35,4 @@ subjects:
 roleRef:
   kind: Role
   name: argocd-app-controller-role
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: argocd-tekton-role
-  namespace: island-ci-cd-poc
-rules:
-  - apiGroups: ["tekton.dev"]
-    resources: ["pipelines"]
-    verbs: ["create", "update", "patch", "delete", "get", "list", "watch"]
---- 
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: argocd-tekton-rolebinding
-  namespace: island-ci-cd-poc
-subjects:
-  - kind: ServiceAccount
-    name: openshift-gitops-argocd-application-controller
-    namespace: openshift-gitops
-roleRef:
-  kind: Role
-  name: argocd-tekton-role
   apiGroup: rbac.authorization.k8s.io
