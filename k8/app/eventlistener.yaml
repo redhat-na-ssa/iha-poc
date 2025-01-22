@@ -1,0 +1,236 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template-island-health-poc
+  namespace: island-ci-cd-poc
+spec:
+  params:
+  - name: git-revision
+  - name: git-commit-message
+  - name: git-repo-url
+  - name: git-repo-name
+  - name: content-type
+  - name: pusher-name
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1
+    kind: PipelineRun
+    metadata:
+      annotations:
+        pipeline.openshift.io/started-by: kube:admin
+      generateName: island-health-poc-
+      labels:
+        app.kubernetes.io/instance: island-health-poc
+        app.kubernetes.io/name: island-health-poc
+        operator.tekton.dev/operand-name: openshift-pipelines-addons
+        pipeline.openshift.io/strategy: docker
+        pipeline.openshift.io/type: kubernetes
+        tekton.dev/pipeline: island-health-poc
+      namespace: island-ci-cd-poc
+    spec:
+      params:
+      - name: APP_NAME
+        value: island-health-poc
+      - name: GIT_REPO
+        value: https://github.com/redhat-na-ssa/island-health-poc.git
+      - name: GIT_REVISION
+        value: ""
+      - name: IMAGE_NAME
+        value: image-registry.openshift-image-registry.svc:5000/island-ci-cd-poc/island-health-poc
+      - name: PATH_CONTEXT
+        value: .
+      pipelineRef:
+        name: island-health-poc
+      status: null
+      workspaces:
+      - name: workspace
+        volumeClaimTemplate:
+          metadata:
+            labels:
+              tekton.dev/pipeline: island-health-poc
+          spec:
+            accessModes:
+            - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: event-listener
+  namespace: island-ci-cd-poc
+spec:
+  serviceAccountName: pipeline
+  triggers:
+  - bindings:
+    - kind: ClusterTriggerBinding
+      ref: github-push
+    template:
+      ref: trigger-template-island-health-poc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: event-listener
+  name: el-event-listener
+  namespace: island-ci-cd-poc
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/managed-by: EventListener
+      app.kubernetes.io/part-of: Triggers
+      eventlistener: event-listener
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: EventListener
+        app.kubernetes.io/part-of: Triggers
+        eventlistener: event-listener
+    spec:
+      containers:
+      - args:
+        - --el-name=event-listener
+        - --el-namespace=island-ci-cd-poc
+        - --port=8080
+        - --readtimeout=5
+        - --writetimeout=40
+        - --idletimeout=120
+        - --timeouthandler=30
+        - --httpclient-readtimeout=30
+        - --httpclient-keep-alive=30
+        - --httpclient-tlshandshaketimeout=10
+        - --httpclient-responseheadertimeout=10
+        - --httpclient-expectcontinuetimeout=1
+        - --is-multi-ns=false
+        - --payload-validation=true
+        - --cloudevent-uri=
+        - --tls-cert=
+        - --tls-key=
+        env:
+        - name: K_LOGGING_CONFIG
+          value: '{"zap-logger-config":"{\n  \"level\": \"info\",\n  \"development\":
+            false,\n  \"disableStacktrace\": true,\n  \"sampling\": {\n    \"initial\":
+            100,\n    \"thereafter\": 100\n  },\n  \"outputPaths\": [\"stdout\"],\n  \"errorOutputPaths\":
+            [\"stderr\"],\n  \"encoding\": \"json\",\n  \"encoderConfig\": {\n    \"timeKey\":
+            \"timestamp\",\n    \"levelKey\": \"severity\",\n    \"nameKey\": \"logger\",\n    \"callerKey\":
+            \"caller\",\n    \"messageKey\": \"message\",\n    \"stacktraceKey\":
+            \"stacktrace\",\n    \"lineEnding\": \"\",\n    \"levelEncoder\": \"\",\n    \"timeEncoder\":
+            \"iso8601\",\n    \"durationEncoder\": \"\",\n    \"callerEncoder\": \"\"\n  }\n}\n"}'
+        - name: K_METRICS_CONFIG
+          value: '{"Domain":"tekton.dev/triggers","Component":"eventlistener","PrometheusPort":0,"PrometheusHost":"","ConfigMap":{}}'
+        - name: K_TRACING_CONFIG
+          value: '{"backend":"none","debug":"false","sample-rate":"0.1"}'
+        - name: NAMESPACE
+          value: island-ci-cd-poc
+        - name: NAME
+          value: event-listener
+        - name: EL_EVENT
+          value: enable
+        - name: K_SINK_TIMEOUT
+          value: "30"
+        - name: SYSTEM_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: METRICS_PROMETHEUS_PORT
+          value: "9000"
+        image: registry.redhat.io/openshift-pipelines/pipelines-triggers-eventlistenersink-rhel8@sha256:0c47daeb43cb90a4b8dcdf1fa324c2672ed9193628081d734d17863f1567d087
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /live
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: event-listener
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 9000
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /live
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: pipeline
+      serviceAccountName: pipeline
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: event-listener
+  name: el-event-listener
+  namespace: island-ci-cd-poc
+spec:
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-listener
+    port: 8080
+  - name: http-metrics
+    port: 9000
+  selector:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: event-listener
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: EventListener
+    app.kubernetes.io/part-of: Triggers
+    eventlistener: event-listener
+  name: el-event-listener
+  namespace: island-ci-cd-poc
+spec:
+  port:
+    targetPort: http-listener
+  to:
+    kind: Service
+    name: el-event-listener
+    weight: 100
+  wildcardPolicy: None
