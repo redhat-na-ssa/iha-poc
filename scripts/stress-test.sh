@@ -7,10 +7,10 @@ echo $HOST
 URL="https://${HOST}/hello"
 
 # Number of concurrent requests
-CONCURRENT_REQUESTS=100
+CONCURRENT_REQUESTS=500
 
 # Number of total requests
-TOTAL_REQUESTS=10000
+TOTAL_REQUESTS=100000
 
 # Function to send a single request
 send_request() {
