@@ -10,4 +10,4 @@ spec:
   source:
     path: k8/app
     repoURL: https://github.com/redhat-na-ssa/island-health-poc.git
-    targetRevision: HEAD
+    targetRevision: poc
