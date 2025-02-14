@@ -9,5 +9,5 @@ spec:
   project: default
   source:
     path: k8/app
-    repoURL: https://github.com/redhat-na-ssa/island-health-poc.git
+    repoURL: https://github.com/[CHANGE ME]/iha-poc.git
     targetRevision: poc

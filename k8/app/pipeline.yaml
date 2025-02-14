@@ -14,7 +14,7 @@ spec:
   - default: sample-rest-api
     name: APP_NAME
     type: string
-  - default: https://github.com/redhat-na-ssa/island-health-poc.git
+  - default: https://github.com/[CHANGE ME]/iha-poc.git
     name: GIT_REPO
     type: string
   - default: ""
