@@ -202,3 +202,65 @@ oc policy add-role-to-user system:image-puller system:serviceaccount:island-cont
 ### Fully automated CI/CD deplyment with Pipelines and GitOps
 
 This is where it is really important that you are working off of the `poc` branch and have updated the `yaml` files mentioned earlier
+
+- Log into gitops. Either with OpenShift credentials or default admin password
+
+- To get to gitops page, click on the grid above
+
+  - To get default admin password:
+
+```bash
+oc get secret/openshift-gitops-cluster -n openshift-gitops -o jsonpath='{.data.admin\.password}' | base64 -d 
+```
+
+- Deploy GitOps application
+
+```bash
+oc apply -f k8/gitops
+```
+
+- We need to run the pipeline in order to build our application
+  - Go to the Project `island-ci-cd-poc` (GitOps created it for us)
+
+- If pipeline fails, delete the container image (Should be in `imagePullBackoff`)
+    - Subsequent pipeline runs should succeed
+
+- Reset Event Listener Webhook settings for GitHub
+  - URL is from EL route 
+
+- Make some code changes, commit and push to trigger pipeline
+
+Example
+
+```python
+@app.get("/hello-gitops")
+async def read_hello():
+    # Return a JSON object with the key "message" and value "Hello World"
+    return {"message": "Hello gitops from " + service_local}
+```
+
+- This should trigger a new PipelinRun
+
+## Autoscaling
+
+For this deployment, there is a `HorizontalAutoscaler` configured with it
+
+Horizontal Autoscaller
+- Min 1
+- Max 5
+- CPU threshold 25%
+
+Run Script to stress test autoscaler
+
+```bash
+sh scripts/stress-test.sh 
+```
+
+Currently scales to 5 in less than a minute.
+Default takes 5 minutes to cool down to 1 (sometimes longer)
+
+## Additional tasks for this project
+- GitOps manual sync
+- GitOps self-heal
+- GitOps resource management
+    - Note: default polling is 3 minutes
