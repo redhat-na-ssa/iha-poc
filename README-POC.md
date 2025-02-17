@@ -1,57 +1,74 @@
-# Notes for running this POC
+# Proof of Concept (PoC) Guide
+
+## Overview 
+
+This guide walks you through setting up and running a Proof of Concept (PoC) for deploying an application using OpenShift, Tekton Pipelines, and GitOps. It includes multiple deployment methods and automation techniques.
 
 ## Initial Setup
 
-- Create a for from the `redhat-na-ssa` GitHub repo:
+1. Fork the Repository
 
-  - from:  
+Create a fork from the `redhat-na-ssa` GitHub repo:
+
+  - Source Repo:  
 `https://github.com/redhat-na-ssa/iha-poc.git`  
-  - to:  
+  - Your Forked Repo:
 `https://github.com/<your org>/iha-poc.git`
 
-- Create and work off of branch `poc`  
+2. Create and check out the `poc` branch 
 
 ```bash
 git checkout poc
 ```
 
-- Make sure you are on the correct branch from within your IDE
+Ensure you are on the correct branch in your IDE.
 
 ![screenshot](img/image01.png)
 
-- Update three manifests with updated github URL (note this can be templated with Helm eventually):
-  - `k8/app/eventlistener.yaml`
-    - Line 34
+3.  Update GitHub URLs in Manifests
+
+Modify the following YAML files to reflect your GitHub repository:
+
+  - `k8/app/eventlistener.yaml` (Line 34)
 
 ```yaml
 value: https://github.com/[CHANGE ME]/iha-poc.git
 ```
-- `k8/app/pipeline.yaml`
-    - Line 17
+
+- `k8/app/pipeline.yaml` (Line 17)
+ 
 ```yaml
 value: https://github.com/[CHANGE ME]/iha-poc.git
 ```
 
-- Once you have made the above changes, commit and push the changes to the `poc` branch.
+Commit and push these changes to the `poc` branch.
 
-- Log into both the OpenShift Web Consol and CLI
+4. Login to OpenShift
+
+Log into both the OpenShift Web Consol and CLI
   - Once you log into OpenShift Web Console, you should be able to obtain the login credentials from the UI
 
   ![screenshot](img/image02.png)
 
 ```bash
-oc login --token=sha256~<some long super secret token>
+oc login --token=sha256~<your-token>
 ```
 
-- Install the two following operators from OperatorHub
+5. Install Required Operators
+
+From OperatorHub, install:
+
   1. Red Hat OpenShift Pipelines
   2. Red Hat OpenShift GitOps
 
-## Exploring 4 deplyment methods
+## Exploring Deployment Methods
+
+This PoC covers four deployment methods:
+
 1. Manual s2i (BuildConfig) via the web console
 2. Manual s2i (Pipeline) process via web console
-3. Use the built container image from method 2 to manually deploy to same or different Project/namespace
-4. Fully automated CI/CD deplyment with Pipelines and GitOps 
+3. Deploying a Pre-built Container Image (From method 2)
+4. Fully automated CI/CD deployment with Pipelines and GitOps 
 
 
 ### Manual s2i (BuildConfig) via the web console
