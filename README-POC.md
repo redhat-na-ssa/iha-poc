@@ -123,7 +123,7 @@ oc describe -n island-s2i-bc route iha-poc-git
 Example of scaling to 4 replicas via the CLI
 
 ```bash
-oc scale deploy/iha-poc --replicas=4 
+oc scale deploy/iha-poc-git --replicas=4 
 ```
 
 - If you want to delete this project and start over again you can run
