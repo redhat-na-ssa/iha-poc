@@ -183,6 +183,17 @@ async def read_hello():
 - Once you push the code, a new `PipelineRun` will start
 - Check the new code to ensure your new app is deployed.
   - (Note: you may have to delete the pod to force a new image deployment)
+  - Or update the `deplpoy` task:
+
+ ```yaml
+- name: deploy 
+  params: 
+    - name: SCRIPT 
+      value: | 
+        oc set image deploy/$(params.APP_NAME) $(params.APP_NAME)=$(params.IMAGE_NAME)@$(tasks.build.results.IMAGE_DIGEST) 
+        oc rollout status deploy/$(params.APP_NAME)
+```
+
 
 ### Use the previously built container image from method 2 to manually deploy to same or different Project/namespace
 
