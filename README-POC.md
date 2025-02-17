@@ -12,7 +12,7 @@
 - Create and work off of branch `poc`  
 
 ```bash
-git checkout branch poc
+git checkout poc
 ```
 
 - Make sure you are on the correct branch from within your IDE
