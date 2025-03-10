@@ -1,7 +1,6 @@
 # Docker
 # Build a Docker image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 trigger:
 - main
 
@@ -10,20 +9,31 @@ resources:
 
 variables:
   tag: '$(Build.BuildId)'
+  quay_registry: 'quay.io'
+  quay_repo: 'llevy/azure-ci'  
+  image_name: '$(quay_registry)/$(quay_repo):$(tag)'
 
 stages:
 - stage: Build
-  displayName: Build image
+  displayName: Build and Push Image
   jobs:
   - job: Build
-    displayName: Build
+    displayName: Build and Push
     pool:
       vmImage: ubuntu-latest
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Login to Quay.io
       inputs:
-        command: build
+        command: login
+        containerRegistry: Quay.io  # Ensure this matches your service connection name
+
+    - task: Docker@2
+      displayName: Build and Push Docker Image
+      inputs:
+        command: buildAndPush
+        containerRegistry: Quay.io  # Must match service connection name
+        repository: 'llevy/azure-ci'  # Your Quay.io repository
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
